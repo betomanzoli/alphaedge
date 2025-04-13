@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,20 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+        trading: {
+          profit: '#10B981', // Green for profits
+          loss: '#EF4444', // Red for losses
+          neutral: '#8E9196', // Gray for neutral indicators
+          primary: '#8B5CF6', // Purple primary
+          secondary: '#7E69AB', // Secondary purple
+          dark: '#121726', // Dark blue/gray background
+          darker: '#0C111B', // Darker shade for panels
+          chart1: '#10B981', // Green for chart line 1
+          chart2: '#3B82F6', // Blue for chart line 2
+          chart3: '#F59E0B', // Yellow/orange for chart line 3
+          chart4: '#EC4899', // Pink for chart line 4
+        }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +98,16 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+        'pulse-slow': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.5' },
+        }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+        'pulse-slow': 'pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 			}
 		}
 	},

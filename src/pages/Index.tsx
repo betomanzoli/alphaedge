@@ -1,11 +1,34 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import Dashboard from "@/components/dashboard/Dashboard";
+import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { toast } = useToast();
+  
+  // Welcome notification on first load
+  useState(() => {
+    toast({
+      title: "Welcome to AlgoTrader",
+      description: "Your automated trading platform is ready",
+    });
+  });
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="flex h-screen bg-trading-dark text-white overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar isOpen={sidebarOpen} />
+      
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        
+        <main className="flex-1 overflow-auto p-4">
+          <Dashboard />
+        </main>
       </div>
     </div>
   );
