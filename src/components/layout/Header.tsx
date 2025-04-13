@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Logo from "./Logo";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -25,7 +26,12 @@ const Header = ({ onMenuClick }: HeaderProps) => {
         <Button variant="ghost" size="icon" onClick={onMenuClick} className="mr-4">
           <Menu className="h-6 w-6" />
         </Button>
-        <h1 className="text-xl font-bold text-white">AlgoTrader Nexus</h1>
+        <div className="hidden md:block">
+          <Logo />
+        </div>
+        <div className="md:hidden">
+          <Logo isMinimal />
+        </div>
       </div>
 
       <div className="flex items-center space-x-2">

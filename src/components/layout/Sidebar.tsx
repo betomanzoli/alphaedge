@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { NavLink } from "@/components/ui/nav-link";
 import { Separator } from "@/components/ui/separator";
+import Logo from "./Logo";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -29,9 +30,9 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
       <div className="p-4">
         <div className="flex items-center justify-center mb-6">
           {isOpen ? (
-            <span className="text-xl font-bold">AlgoTrader</span>
+            <Logo />
           ) : (
-            <span className="text-xl font-bold">AT</span>
+            <Logo isMinimal />
           )}
         </div>
 

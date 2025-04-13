@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Dashboard from "@/components/dashboard/Dashboard";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
@@ -10,12 +10,12 @@ const Index = () => {
   const { toast } = useToast();
   
   // Welcome notification on first load
-  useState(() => {
+  useEffect(() => {
     toast({
-      title: "Welcome to AlgoTrader",
+      title: "Welcome to AlphaEdge",
       description: "Your automated trading platform is ready",
     });
-  });
+  }, [toast]);
 
   return (
     <div className="flex h-screen bg-trading-dark text-white overflow-hidden">
