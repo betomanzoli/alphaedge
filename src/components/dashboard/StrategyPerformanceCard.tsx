@@ -7,7 +7,8 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  Cell
 } from 'recharts';
 
 const strategyData = [
@@ -53,10 +54,17 @@ const StrategyPerformanceCard = () => {
                 formatter={(value) => [`${value}%`, 'Performance']}
               />
               <Bar 
-                dataKey="performance" 
-                fill={(data) => (data.performance >= 0 ? "#10B981" : "#EF4444")}
-                radius={[4, 4, 0, 0]} 
-              />
+                dataKey="performance"
+                fill="#10B981"
+                radius={[4, 4, 0, 0]}
+              >
+                {strategyData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`}
+                    fill={entry.performance >= 0 ? "#10B981" : "#EF4444"}
+                  />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
