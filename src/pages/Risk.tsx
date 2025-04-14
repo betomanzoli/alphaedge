@@ -1,3 +1,8 @@
+import { 
+  Info, 
+  AlertTriangle, 
+  ShieldCheck 
+} from "lucide-react";
 
 import { useState } from "react";
 import Header from "@/components/layout/Header";
@@ -10,7 +15,6 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { InfoCircle, AlertTriangle, ShieldCheck } from "lucide-react";
 
 const Risk = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
