@@ -26,11 +26,8 @@ const Header = ({ onMenuClick }: HeaderProps) => {
         <Button variant="ghost" size="icon" onClick={onMenuClick} className="mr-4">
           <Menu className="h-6 w-6" />
         </Button>
-        <div className="hidden md:block">
+        <div className="flex items-center">
           <Logo />
-        </div>
-        <div className="md:hidden">
-          <Logo isMinimal />
         </div>
       </div>
 

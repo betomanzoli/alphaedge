@@ -21,55 +21,88 @@ const Logo: React.FC<LogoProps> = ({ isMinimal = false }) => {
     const drawLogo = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Center point
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
+      // Set up dimensions based on minimal mode
+      const width = canvas.width;
+      const height = canvas.height;
+      const centerX = width / 2;
+      const centerY = height / 2;
       
-      // Draw the main triangle
+      // Create a cube-like trading icon that rotates
+      const cubeSize = isMinimal ? 16 : 24;
+      const rotationSpeed = 0.01;
+      
+      // Draw the base of the logo - a hexagon
       ctx.beginPath();
-      ctx.moveTo(centerX, centerY - 20 + Math.sin(time * 2) * 2);
-      ctx.lineTo(centerX - 20, centerY + 15 + Math.sin(time * 2 + 1) * 2);
-      ctx.lineTo(centerX + 20, centerY + 15 + Math.sin(time * 2 + 2) * 2);
+      for (let i = 0; i < 6; i++) {
+        const angle = (time * rotationSpeed) + (i * Math.PI / 3);
+        const x = centerX + Math.cos(angle) * cubeSize;
+        const y = centerY + Math.sin(angle) * cubeSize;
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
       ctx.closePath();
       
-      // Create gradient
-      const gradient = ctx.createLinearGradient(centerX - 20, centerY - 20, centerX + 20, centerY + 20);
-      gradient.addColorStop(0, '#3B82F6');
-      gradient.addColorStop(1, '#8B5CF6');
+      // Create gradient for the hexagon
+      const hexGradient = ctx.createLinearGradient(
+        centerX - cubeSize, 
+        centerY - cubeSize, 
+        centerX + cubeSize, 
+        centerY + cubeSize
+      );
+      hexGradient.addColorStop(0, '#8B5CF6');
+      hexGradient.addColorStop(1, '#3B82F6');
       
-      ctx.fillStyle = gradient;
+      ctx.fillStyle = hexGradient;
       ctx.fill();
       
-      // Draw pulsating circle
-      const pulse = Math.sin(time * 3) * 0.2 + 0.8;
-      
+      // Draw pulsating central point
+      const pulseFactor = Math.sin(time * 3) * 0.3 + 0.7;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 8 * pulse, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, cubeSize / 3 * pulseFactor, 0, Math.PI * 2);
       ctx.fillStyle = '#10B981';
       ctx.fill();
       
-      // Draw orbiting dots
-      const orbitRadius = 25;
-      const dotCount = 3;
+      // Draw trending lines (up and down)
+      ctx.lineWidth = 2;
       
-      for (let i = 0; i < dotCount; i++) {
-        const angle = time * 1.5 + (i * (Math.PI * 2 / dotCount));
-        const dotX = centerX + Math.cos(angle) * orbitRadius;
-        const dotY = centerY + Math.sin(angle) * orbitRadius;
+      // Trending up line
+      ctx.beginPath();
+      const lineStartX = centerX - cubeSize * 0.6;
+      const lineStartY = centerY + cubeSize * 0.3;
+      const lineEndX = centerX + cubeSize * 0.6;
+      const lineEndY = centerY - cubeSize * 0.3;
+      
+      ctx.moveTo(lineStartX, lineStartY);
+      ctx.lineTo(lineEndX, lineEndY);
+      ctx.strokeStyle = '#F59E0B';
+      ctx.stroke();
+      
+      // Draw small dots at data points along the trend line
+      const pointCount = 3;
+      for (let i = 0; i < pointCount; i++) {
+        const pointX = lineStartX + (lineEndX - lineStartX) * (i / (pointCount - 1));
+        const pointY = lineStartY + (lineEndY - lineStartY) * (i / (pointCount - 1));
+        
+        // Add some animation to the points
+        const wobble = Math.sin(time * 2 + i) * 2;
         
         ctx.beginPath();
-        ctx.arc(dotX, dotY, 2, 0, Math.PI * 2);
-        ctx.fillStyle = '#F59E0B';
+        ctx.arc(pointX, pointY + wobble, 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
         ctx.fill();
       }
       
-      // Draw text if not minimal
+      // Draw the text if not in minimal mode
       if (!isMinimal) {
-        ctx.font = 'bold 16px Arial';
+        ctx.font = 'bold 18px Arial';
         ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
+        ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText('AlphaEdge', centerX, centerY + 35);
+        ctx.fillText('AlphaEdge', centerX + cubeSize + 8, centerY);
       }
       
       time += 0.01;
@@ -88,8 +121,8 @@ const Logo: React.FC<LogoProps> = ({ isMinimal = false }) => {
   return (
     <canvas 
       ref={canvasRef} 
-      width={isMinimal ? 50 : 140} 
-      height={isMinimal ? 50 : 70} 
+      width={isMinimal ? 40 : 160} 
+      height={isMinimal ? 40 : 40} 
       className="logo-canvas"
     />
   );
