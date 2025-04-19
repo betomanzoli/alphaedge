@@ -51,15 +51,15 @@ const Market = () => {
         <main className="flex-1 overflow-auto p-6">
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <h2 className="text-2xl font-bold">Market Data</h2>
+              <h2 className="text-2xl font-bold">Dados de Mercado</h2>
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-400">Asset:</span>
+                <span className="text-sm text-gray-400">Ativo:</span>
                 <Select 
                   value={selectedAsset}
                   onValueChange={setSelectedAsset}
                 >
                   <SelectTrigger className="w-32 bg-trading-darker border-gray-700">
-                    <SelectValue placeholder="Select Asset" />
+                    <SelectValue placeholder="Selecionar Ativo" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="btc">BTC</SelectItem>
@@ -69,20 +69,20 @@ const Market = () => {
                   </SelectContent>
                 </Select>
                 
-                <span className="text-sm text-gray-400">Timeframe:</span>
+                <span className="text-sm text-gray-400">Período:</span>
                 <Select 
                   value={selectedTimeframe}
                   onValueChange={setSelectedTimeframe}
                 >
                   <SelectTrigger className="w-24 bg-trading-darker border-gray-700">
-                    <SelectValue placeholder="Select Timeframe" />
+                    <SelectValue placeholder="Selecionar Período" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="15m">15m</SelectItem>
                     <SelectItem value="1h">1h</SelectItem>
                     <SelectItem value="4h">4h</SelectItem>
                     <SelectItem value="1d">1d</SelectItem>
-                    <SelectItem value="1w">1w</SelectItem>
+                    <SelectItem value="1w">1s</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -90,16 +90,19 @@ const Market = () => {
 
             <Tabs defaultValue="price" className="w-full">
               <TabsList className="bg-trading-darker border-gray-800">
-                <TabsTrigger value="price">Price</TabsTrigger>
+                <TabsTrigger value="price">Preço</TabsTrigger>
                 <TabsTrigger value="volume">Volume</TabsTrigger>
-                <TabsTrigger value="orderbook">Orderbook</TabsTrigger>
-                <TabsTrigger value="funding">Funding</TabsTrigger>
+                <TabsTrigger value="orderbook">Livro de Ordens</TabsTrigger>
+                <TabsTrigger value="funding">Financiamento</TabsTrigger>
               </TabsList>
               
               <TabsContent value="price" className="pt-4">
                 <Card className="bg-trading-darker border-gray-800">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-medium">{assetNames[selectedAsset]} Price Chart ({selectedTimeframe})</CardTitle>
+                    <CardTitle className="text-lg font-medium">Gráfico de Preço {assetNames[selectedAsset]} ({selectedTimeframe})</CardTitle>
+                    <CardDescription className="text-xs text-gray-400">
+                      Este gráfico mostra a variação de preço ao longo do período selecionado. Você pode alterar o ativo e o período usando os seletores acima.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="h-96">
@@ -147,7 +150,10 @@ const Market = () => {
               <TabsContent value="volume" className="pt-4">
                 <Card className="bg-trading-darker border-gray-800">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-medium">{assetNames[selectedAsset]} Volume ({selectedTimeframe})</CardTitle>
+                    <CardTitle className="text-lg font-medium">Volume {assetNames[selectedAsset]} ({selectedTimeframe})</CardTitle>
+                    <CardDescription className="text-xs text-gray-400">
+                      Este gráfico mostra o volume de negociação ao longo do período selecionado. Um maior volume indica maior atividade no mercado.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="h-96">
@@ -191,12 +197,15 @@ const Market = () => {
               <TabsContent value="orderbook" className="pt-4">
                 <Card className="bg-trading-darker border-gray-800">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-medium">{assetNames[selectedAsset]} Orderbook</CardTitle>
+                    <CardTitle className="text-lg font-medium">Livro de Ordens {assetNames[selectedAsset]}</CardTitle>
+                    <CardDescription className="text-xs text-gray-400">
+                      O livro de ordens mostra as ordens de compra (bid) e venda (ask) atuais. A coluna da esquerda mostra os preços de compra e a direita os preços de venda.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h3 className="text-sm font-medium text-gray-400 mb-2">Bids</h3>
+                        <h3 className="text-sm font-medium text-gray-400 mb-2">Ordens de Compra</h3>
                         <div className="space-y-1">
                           {[...Array(10)].map((_, i) => (
                             <div key={`bid-${i}`} className="flex justify-between">
@@ -207,7 +216,7 @@ const Market = () => {
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-sm font-medium text-gray-400 mb-2">Asks</h3>
+                        <h3 className="text-sm font-medium text-gray-400 mb-2">Ordens de Venda</h3>
                         <div className="space-y-1">
                           {[...Array(10)].map((_, i) => (
                             <div key={`ask-${i}`} className="flex justify-between">
@@ -225,35 +234,38 @@ const Market = () => {
               <TabsContent value="funding" className="pt-4">
                 <Card className="bg-trading-darker border-gray-800">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-medium">{assetNames[selectedAsset]} Funding Rate</CardTitle>
+                    <CardTitle className="text-lg font-medium">Taxa de Financiamento {assetNames[selectedAsset]}</CardTitle>
+                    <CardDescription className="text-xs text-gray-400">
+                      Taxas de financiamento são utilizadas em contratos perpétuos. Taxas positivas são pagas pelos compradores aos vendedores e taxas negativas são pagas pelos vendedores aos compradores.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Grid className="grid-cols-1 md:grid-cols-3 gap-4">
                       <Card className="bg-trading-dark border-gray-800">
                         <CardContent className="p-4">
-                          <div className="text-sm text-gray-400">Current Rate</div>
-                          <div className="text-xl font-bold text-green-500">+0.01%</div>
-                          <div className="text-xs text-gray-400">Next in 4h 23m</div>
+                          <div className="text-sm text-gray-400">Taxa Atual</div>
+                          <div className="text-xl font-bold text-green-500">+0,01%</div>
+                          <div className="text-xs text-gray-400">Próxima em 4h 23m</div>
                         </CardContent>
                       </Card>
                       <Card className="bg-trading-dark border-gray-800">
                         <CardContent className="p-4">
-                          <div className="text-sm text-gray-400">8h Rate</div>
-                          <div className="text-xl font-bold text-red-500">-0.003%</div>
-                          <div className="text-xs text-gray-400">Charged at 16:00 UTC</div>
+                          <div className="text-sm text-gray-400">Taxa de 8h</div>
+                          <div className="text-xl font-bold text-red-500">-0,003%</div>
+                          <div className="text-xs text-gray-400">Cobrada às 16:00 UTC</div>
                         </CardContent>
                       </Card>
                       <Card className="bg-trading-dark border-gray-800">
                         <CardContent className="p-4">
-                          <div className="text-sm text-gray-400">Daily Average</div>
-                          <div className="text-xl font-bold">+0.004%</div>
-                          <div className="text-xs text-gray-400">APR: +1.46%</div>
+                          <div className="text-sm text-gray-400">Média Diária</div>
+                          <div className="text-xl font-bold">+0,004%</div>
+                          <div className="text-xs text-gray-400">Taxa Anual: +1,46%</div>
                         </CardContent>
                       </Card>
                     </Grid>
                     
                     <div className="mt-6">
-                      <h3 className="text-lg font-medium mb-4">Historical Funding Rates</h3>
+                      <h3 className="text-lg font-medium mb-4">Histórico de Taxas de Financiamento</h3>
                       <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart
@@ -275,7 +287,7 @@ const Market = () => {
                                 backgroundColor: '#121726',
                                 borderColor: '#374151',
                               }}
-                              formatter={(value) => [`${value}%`, 'Rate']}
+                              formatter={(value) => [`${value}%`, 'Taxa']}
                             />
                             <Line 
                               type="monotone" 

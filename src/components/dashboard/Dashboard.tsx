@@ -15,15 +15,15 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold">Dashboard</h2>
+        <h2 className="text-2xl font-bold">Painel Principal</h2>
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-400">Trading Pair:</span>
+          <span className="text-sm text-gray-400">Par de Negociação:</span>
           <Select 
             value={selectedSymbol}
             onValueChange={setSelectedSymbol}
           >
             <SelectTrigger className="w-32 bg-trading-darker border-gray-700">
-              <SelectValue placeholder="Select Symbol" />
+              <SelectValue placeholder="Selecionar Par" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="BTCUSDT">BTC/USDT</SelectItem>
