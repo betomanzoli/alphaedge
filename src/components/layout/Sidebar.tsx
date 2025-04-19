@@ -38,25 +38,25 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
 
         <nav className="space-y-1">
           <NavLink href="/" icon={<Home className="h-5 w-5" />} showText={isOpen}>
-            Dashboard
+            Painel Principal
           </NavLink>
           <NavLink href="/strategies" icon={<PanelTop className="h-5 w-5" />} showText={isOpen}>
-            Strategies
+            Estratégias
           </NavLink>
           <NavLink href="/market" icon={<LineChart className="h-5 w-5" />} showText={isOpen}>
-            Market Data
+            Mercado
           </NavLink>
           <NavLink href="/wallet" icon={<Wallet className="h-5 w-5" />} showText={isOpen}>
-            Wallet
+            Carteira
           </NavLink>
           <NavLink href="/history" icon={<History className="h-5 w-5" />} showText={isOpen}>
-            Trade History
+            Histórico
           </NavLink>
           <NavLink href="/risk" icon={<AlertTriangle className="h-5 w-5" />} showText={isOpen}>
-            Risk Management
+            Gerenciamento de Risco
           </NavLink>
           <NavLink href="/performance" icon={<Gauge className="h-5 w-5" />} showText={isOpen}>
-            Performance
+            Desempenho
           </NavLink>
         </nav>
 
@@ -64,13 +64,13 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
 
         <nav className="space-y-1">
           <NavLink href="/settings" icon={<Settings className="h-5 w-5" />} showText={isOpen}>
-            Settings
+            Configurações
           </NavLink>
           <NavLink href="/api" icon={<Lock className="h-5 w-5" />} showText={isOpen}>
-            API Keys
+            Chaves API
           </NavLink>
           <NavLink href="/docs" icon={<BookOpen className="h-5 w-5" />} showText={isOpen}>
-            Documentation
+            Documentação
           </NavLink>
         </nav>
       </div>

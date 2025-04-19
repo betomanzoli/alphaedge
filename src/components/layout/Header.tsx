@@ -19,7 +19,7 @@ interface HeaderProps {
 }
 
 const Header = ({ onMenuClick }: HeaderProps) => {
-  const [notifications, setNotifications] = useState(3);
+  const [notifications, setNotifications] = useState(0); // Iniciando sem notificações
   const navigate = useNavigate();
 
   return (
@@ -41,7 +41,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           onClick={() => navigate("/risk")}
         >
           <AlertTriangle className="h-4 w-4 mr-1" />
-          <span className="hidden sm:inline">Risk</span>
+          <span className="hidden sm:inline">Riscos</span>
         </Button>
 
         <DropdownMenu>
@@ -56,26 +56,15 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuLabel>Notificações</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <div className="flex flex-col">
-                <span className="font-medium">API Connection Active</span>
-                <span className="text-xs text-muted-foreground">Your Binance API connection is now active</span>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <div className="flex flex-col">
-                <span className="font-medium">Strategy Activated</span>
-                <span className="text-xs text-muted-foreground">Grid Trading strategy is now running</span>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <div className="flex flex-col">
-                <span className="font-medium">Order Executed</span>
-                <span className="text-xs text-muted-foreground">Buy order for BTC executed at $66,250</span>
-              </div>
-            </DropdownMenuItem>
+            {notifications === 0 ? (
+              <DropdownMenuItem>
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted-foreground">Sem notificações no momento</span>
+                </div>
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -87,15 +76,15 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => navigate("/settings")}>
-              Account Settings
+              Configurações da Conta
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/api")}>
-              API Configuration
+              Configuração de API
             </DropdownMenuItem>
-            <DropdownMenuItem>Theme</DropdownMenuItem>
+            <DropdownMenuItem>Tema</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/docs")}>
-              Help & Documentation
+              Ajuda & Documentação
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -107,12 +96,12 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem>Perfil</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/settings")}>
-              Preferences
+              Preferências
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Log out</DropdownMenuItem>
+            <DropdownMenuItem>Sair</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
