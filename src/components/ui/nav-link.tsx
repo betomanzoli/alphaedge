@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 export interface NavLinkProps {
@@ -18,8 +18,8 @@ export function NavLink({
   showText = true,
   className 
 }: NavLinkProps) {
-  // In a real implementation we would use something like useLocation
-  // to determine the active state based on the current route
+  // Use the useLocation hook to determine if the link is active
+  const location = useLocation();
   const isActive = location.pathname === href;
 
   return (
@@ -34,9 +34,9 @@ export function NavLink({
       )}
     >
       {icon && (
-        <span className="mr-2">{icon}</span>
+        <span className={cn("flex-shrink-0", !showText && "mx-auto")}>{icon}</span>
       )}
-      {showText && <span>{children}</span>}
+      {showText && <span className="ml-2">{children}</span>}
     </Link>
   );
 }

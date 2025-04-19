@@ -27,16 +27,16 @@ const Logo: React.FC<LogoProps> = ({ isMinimal = false }) => {
       const centerX = width / 2;
       const centerY = height / 2;
       
-      // Create a cube-like trading icon that rotates
-      const cubeSize = isMinimal ? 16 : 24;
-      const rotationSpeed = 0.01;
+      // Create a more sophisticated logo design
+      const baseSize = isMinimal ? 16 : 24;
       
-      // Draw the base of the logo - a hexagon
+      // Draw the base of the logo - a hexagon with gradient fill
+      const hexagonRadius = baseSize * 1.1;
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
-        const angle = (time * rotationSpeed) + (i * Math.PI / 3);
-        const x = centerX + Math.cos(angle) * cubeSize;
-        const y = centerY + Math.sin(angle) * cubeSize;
+        const angle = (time * 0.01) + (i * Math.PI / 3);
+        const x = centerX + Math.cos(angle) * hexagonRadius;
+        const y = centerY + Math.sin(angle) * hexagonRadius;
         
         if (i === 0) {
           ctx.moveTo(x, y);
@@ -46,66 +46,117 @@ const Logo: React.FC<LogoProps> = ({ isMinimal = false }) => {
       }
       ctx.closePath();
       
-      // Create gradient for the hexagon
+      // Create a more vibrant gradient for the hexagon
       const hexGradient = ctx.createLinearGradient(
-        centerX - cubeSize, 
-        centerY - cubeSize, 
-        centerX + cubeSize, 
-        centerY + cubeSize
+        centerX - hexagonRadius, 
+        centerY - hexagonRadius, 
+        centerX + hexagonRadius, 
+        centerY + hexagonRadius
       );
-      hexGradient.addColorStop(0, '#8B5CF6');
-      hexGradient.addColorStop(1, '#3B82F6');
+      hexGradient.addColorStop(0, '#7c3aed'); // More vibrant purple
+      hexGradient.addColorStop(0.5, '#8b5cf6');
+      hexGradient.addColorStop(1, '#4f46e5'); // Indigo touch
       
       ctx.fillStyle = hexGradient;
       ctx.fill();
       
-      // Draw pulsating central point
-      const pulseFactor = Math.sin(time * 3) * 0.3 + 0.7;
+      // Add outer glow effect
+      ctx.shadowColor = '#8b5cf6';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#c4b5fd';
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      
+      // Draw central symbol - a dynamic graph icon
       ctx.beginPath();
-      ctx.arc(centerX, centerY, cubeSize / 3 * pulseFactor, 0, Math.PI * 2);
-      ctx.fillStyle = '#10B981';
+      const innerRadius = baseSize * 0.5;
+      ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+      
+      const innerGradient = ctx.createRadialGradient(
+        centerX, centerY, 0,
+        centerX, centerY, innerRadius
+      );
+      innerGradient.addColorStop(0, '#10B981'); // Green center
+      innerGradient.addColorStop(1, '#059669'); // Darker green edge
+      
+      ctx.fillStyle = innerGradient;
       ctx.fill();
       
-      // Draw trending lines (up and down)
+      // Add dynamic trading graph lines
       ctx.lineWidth = 2;
       
-      // Trending up line
-      ctx.beginPath();
-      const lineStartX = centerX - cubeSize * 0.6;
-      const lineStartY = centerY + cubeSize * 0.3;
-      const lineEndX = centerX + cubeSize * 0.6;
-      const lineEndY = centerY - cubeSize * 0.3;
+      // Rising trend line with animation
+      const lineLength = baseSize * 1.2;
+      const lineAmplitude = baseSize * 0.3;
+      const linePhase = time * 5;
       
-      ctx.moveTo(lineStartX, lineStartY);
-      ctx.lineTo(lineEndX, lineEndY);
-      ctx.strokeStyle = '#F59E0B';
+      ctx.beginPath();
+      ctx.moveTo(centerX - lineLength, centerY);
+      
+      // Create animated graph path
+      for (let i = 0; i <= 20; i++) {
+        const x = centerX - lineLength + (lineLength * 2 * i / 20);
+        const progress = i / 20;
+        // Create a dynamic wave pattern with multiple oscillations
+        const y = centerY - lineAmplitude * Math.sin(progress * Math.PI * 3 + linePhase * 0.1) * 
+                  (1 - Math.abs(progress - 0.5) * 1.2);
+        ctx.lineTo(x, y);
+      }
+      
+      ctx.strokeStyle = '#f59e0b'; // Amber color for the line
       ctx.stroke();
       
-      // Draw small dots at data points along the trend line
-      const pointCount = 3;
-      for (let i = 0; i < pointCount; i++) {
-        const pointX = lineStartX + (lineEndX - lineStartX) * (i / (pointCount - 1));
-        const pointY = lineStartY + (lineEndY - lineStartY) * (i / (pointCount - 1));
+      // Add data points along the line
+      const dataPoints = 5;
+      for (let i = 0; i < dataPoints; i++) {
+        const pointProgress = i / (dataPoints - 1);
+        const pointX = centerX - lineLength + lineLength * 2 * pointProgress;
+        const pointY = centerY - lineAmplitude * Math.sin(pointProgress * Math.PI * 3 + linePhase * 0.1) * 
+                       (1 - Math.abs(pointProgress - 0.5) * 1.2);
         
-        // Add some animation to the points
-        const wobble = Math.sin(time * 2 + i) * 2;
+        const pointSize = (i % 2 === 0) ? 2.5 : 1.5; // Alternate point sizes
         
         ctx.beginPath();
-        ctx.arc(pointX, pointY + wobble, 2, 0, Math.PI * 2);
-        ctx.fillStyle = 'white';
+        ctx.arc(pointX, pointY, pointSize, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
         ctx.fill();
+        
+        // Add glow to key data points
+        if (i % 2 === 0) {
+          ctx.shadowColor = '#ffffff';
+          ctx.shadowBlur = 5;
+          ctx.beginPath();
+          ctx.arc(pointX, pointY, pointSize * 0.8, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
       }
       
       // Draw the text if not in minimal mode
       if (!isMinimal) {
-        ctx.font = 'bold 18px Arial';
-        ctx.fillStyle = '#ffffff';
+        // Draw text shadow
+        ctx.font = 'bold 20px "Segoe UI", Arial, sans-serif';
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText('AlphaEdge', centerX + cubeSize + 8, centerY);
+        ctx.fillText('AlphaEdge', centerX + baseSize + 9, centerY + 1);
+        
+        // Draw main text with gradient
+        const textGradient = ctx.createLinearGradient(
+          centerX + baseSize, centerY - 10,
+          centerX + baseSize + 100, centerY + 10
+        );
+        textGradient.addColorStop(0, '#f0f9ff'); // Light blue tint
+        textGradient.addColorStop(1, '#e2e8f0'); // Slight gray
+        
+        ctx.font = 'bold 20px "Segoe UI", Arial, sans-serif';
+        ctx.fillStyle = textGradient;
+        ctx.fillText('AlphaEdge', centerX + baseSize + 8, centerY);
       }
       
-      time += 0.01;
+      time += 0.05;
       animationRef.current = requestAnimationFrame(drawLogo);
     };
     
@@ -121,7 +172,7 @@ const Logo: React.FC<LogoProps> = ({ isMinimal = false }) => {
   return (
     <canvas 
       ref={canvasRef} 
-      width={isMinimal ? 40 : 160} 
+      width={isMinimal ? 40 : 200} 
       height={isMinimal ? 40 : 40} 
       className="logo-canvas"
     />

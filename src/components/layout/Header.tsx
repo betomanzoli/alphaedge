@@ -1,8 +1,9 @@
 
 import { Button } from "@/components/ui/button";
-import { Bell, Menu, User, Settings } from "lucide-react";
+import { Bell, Menu, User, Settings, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ interface HeaderProps {
 
 const Header = ({ onMenuClick }: HeaderProps) => {
   const [notifications, setNotifications] = useState(3);
+  const navigate = useNavigate();
 
   return (
     <header className="bg-trading-darker border-b border-gray-800 py-4 px-6 flex items-center justify-between">
@@ -26,12 +28,22 @@ const Header = ({ onMenuClick }: HeaderProps) => {
         <Button variant="ghost" size="icon" onClick={onMenuClick} className="mr-4">
           <Menu className="h-6 w-6" />
         </Button>
-        <div className="flex items-center">
+        <div className="flex items-center cursor-pointer" onClick={() => navigate("/")}>
           <Logo />
         </div>
       </div>
 
       <div className="flex items-center space-x-2">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex items-center text-yellow-400 hover:text-yellow-300"
+          onClick={() => navigate("/risk")}
+        >
+          <AlertTriangle className="h-4 w-4 mr-1" />
+          <span className="hidden sm:inline">Risk</span>
+        </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
@@ -74,11 +86,17 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Account Settings</DropdownMenuItem>
-            <DropdownMenuItem>API Configuration</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/settings")}>
+              Account Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/api")}>
+              API Configuration
+            </DropdownMenuItem>
             <DropdownMenuItem>Theme</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Help & Documentation</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/docs")}>
+              Help & Documentation
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -90,7 +108,9 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Preferences</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/settings")}>
+              Preferences
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Log out</DropdownMenuItem>
           </DropdownMenuContent>
