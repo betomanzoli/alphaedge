@@ -4,48 +4,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Grid } from "@/components/ui/grid";
-import { Play, Pause, Settings, PlusCircle, Trash2 } from "lucide-react";
+import { Play, Settings, PlusCircle, Info } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
-
-const strategies = [
-  {
-    id: "1",
-    name: "Grid Trading",
-    description: "Buy low and sell high within a price range",
-    status: "active",
-    symbol: "BTC/USDT",
-    profit: "+5.8%",
-    lastRun: "Running for 3d 5h"
-  },
-  {
-    id: "2",
-    name: "DCA Advanced",
-    description: "Dollar cost averaging with variable amounts",
-    status: "paused",
-    symbol: "ETH/USDT",
-    profit: "+2.3%",
-    lastRun: "Paused 12h ago"
-  },
-  {
-    id: "3",
-    name: "Trend Following",
-    description: "Follow market trends using moving averages",
-    status: "active",
-    symbol: "BTC/USDT",
-    profit: "-1.2%",
-    lastRun: "Running for 1d 8h"
-  },
-  {
-    id: "4",
-    name: "Mean Reversion",
-    description: "Capitalize on price returns to the mean",
-    status: "inactive",
-    symbol: "SOL/USDT",
-    profit: "0.0%",
-    lastRun: "Never run"
-  }
-];
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Strategies = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -61,72 +23,78 @@ const Strategies = () => {
           <div className="space-y-6">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold">Trading Strategies</h2>
-                <p className="text-gray-400 mt-1">Configure and manage your algorithmic trading strategies</p>
+                <h2 className="text-2xl font-bold">Estratégias de Trading</h2>
+                <p className="text-gray-400 mt-1">Configure e gerencie suas estratégias de trading automatizadas</p>
               </div>
-              <Button className="bg-trading-primary hover:bg-trading-secondary">
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Create Strategy
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button className="bg-trading-primary hover:bg-trading-secondary">
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Criar Estratégia
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Crie uma nova estratégia automatizada</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             
+            <div className="rounded-lg border border-gray-800 bg-trading-darker p-6">
+              <div className="flex items-start gap-4">
+                <Info className="h-5 w-5 text-blue-400 mt-1" />
+                <div>
+                  <h3 className="text-lg font-medium mb-2">Como começar com estratégias automatizadas</h3>
+                  <ol className="list-decimal list-inside space-y-2 text-gray-300">
+                    <li>Configure suas chaves de API na seção "Chaves API"</li>
+                    <li>Escolha uma estratégia predefinida ou crie uma personalizada</li>
+                    <li>Configure os parâmetros da estratégia (par de trading, limites, etc)</li>
+                    <li>Faça um teste com valores pequenos primeiro</li>
+                    <li>Monitore o desempenho e ajuste conforme necessário</li>
+                  </ol>
+                  <div className="mt-4 text-sm text-gray-400">
+                    <p className="font-medium mb-1">Tipos de estratégias disponíveis:</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>Grid Trading - Compra e venda em faixas de preço predefinidas</li>
+                      <li>DCA (Dollar Cost Average) - Investimento em intervalos regulares</li>
+                      <li>Tendência - Segue tendências usando médias móveis</li>
+                      <li>Reversão à Média - Opera em momentos de retorno à média</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Grid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {strategies.map((strategy) => (
-                <Card key={strategy.id} className="bg-trading-darker border-gray-800">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg font-medium">{strategy.name}</CardTitle>
-                      <Badge 
-                        variant={
-                          strategy.status === "active" ? "success" : 
-                          strategy.status === "paused" ? "warning" : "outline"
-                        }
-                      >
-                        {strategy.status}
-                      </Badge>
+              <Card className="bg-trading-darker border-gray-800">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-lg font-medium">Criar Nova Estratégia</CardTitle>
+                      <CardDescription className="text-gray-400">
+                        Comece configurando uma nova estratégia automatizada
+                      </CardDescription>
                     </div>
-                    <CardDescription className="text-gray-400">{strategy.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Trading Pair</span>
-                        <span>{strategy.symbol}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Profit/Loss</span>
-                        <span className={
-                          parseFloat(strategy.profit) > 0 ? "text-trading-profit" : 
-                          parseFloat(strategy.profit) < 0 ? "text-trading-loss" : "text-gray-400"
-                        }>
-                          {strategy.profit}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Status</span>
-                        <span className="text-gray-300">{strategy.lastRun}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between pt-2 border-t border-gray-800">
-                    <Button variant="outline" size="sm" className="border-gray-700">
-                      <Settings className="h-4 w-4 mr-1" /> Configure
-                    </Button>
-                    {strategy.status === "active" ? (
-                      <Button variant="destructive" size="sm" className="bg-red-900 hover:bg-red-800">
-                        <Pause className="h-4 w-4 mr-1" /> Stop
-                      </Button>
-                    ) : (
-                      <Button variant="default" size="sm" className="bg-trading-profit hover:bg-green-700">
-                        <Play className="h-4 w-4 mr-1" /> Start
-                      </Button>
-                    )}
-                    <Button variant="ghost" size="sm" className="text-gray-400">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm text-gray-400">
+                    <p>1. Escolha um tipo de estratégia</p>
+                    <p>2. Configure os parâmetros</p>
+                    <p>3. Defina limites de risco</p>
+                    <p>4. Inicie a operação</p>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between pt-2 border-t border-gray-800">
+                  <Button variant="outline" size="sm" className="border-gray-700">
+                    <Settings className="h-4 w-4 mr-1" /> Configurar
+                  </Button>
+                  <Button variant="default" size="sm" className="bg-trading-profit hover:bg-green-700">
+                    <Play className="h-4 w-4 mr-1" /> Começar
+                  </Button>
+                </CardFooter>
+              </Card>
             </Grid>
           </div>
         </main>

@@ -1,14 +1,27 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, TrendingUp } from "lucide-react";
+import { TrendingUp, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ProfitLossCard = () => {
   return (
     <Card className="bg-trading-darker border-gray-800">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-sm font-medium text-gray-400">Lucro/Perda Diário</CardTitle>
-          <TrendingUp className="h-4 w-4 text-trading-profit" />
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-gray-400">Lucro/Perda Diário</CardTitle>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Resultado das suas operações nas últimas 24 horas</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <TrendingUp className="h-4 w-4 text-gray-400" />
         </div>
       </CardHeader>
       <CardContent>
@@ -27,7 +40,12 @@ const ProfitLossCard = () => {
             <span>Atual: 0%</span>
           </div>
           <div className="mt-2 text-xs text-gray-400">
-            Configure sua meta de lucro nas configurações
+            <p>Para definir suas metas:</p>
+            <ol className="list-decimal list-inside mt-1 space-y-1">
+              <li>Acesse as Configurações</li>
+              <li>Defina suas metas diárias/mensais</li>
+              <li>Configure alertas de performance</li>
+            </ol>
           </div>
         </div>
       </CardContent>
