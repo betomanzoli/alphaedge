@@ -1,0 +1,21 @@
+
+# Dependencies
+node_modules
+package-lock.json
+yarn.lock
+npm-debug.log*
+
+# Environment variables
+.env
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.log
+
+# Editor directories and files
+.idea
+.vscode
+*.swp
+*.swo
