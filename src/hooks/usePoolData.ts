@@ -6,6 +6,7 @@ import { Pool } from '@uniswap/v3-sdk';
 import { Token } from '@uniswap/sdk-core';
 import { CHAIN_OPTIMISM_MAINNET, DEX_POOLS } from '@/constants/dex';
 import { useToast } from '@/hooks/use-toast';
+import { useWeb3 } from './useWeb3';
 
 const UNISWAP_POOL_ABI = [
   'function slot0() external view returns (uint160 sqrtPriceX96, int24 tick, uint16 observationIndex, uint16 observationCardinality, uint16 observationCardinalityNext, uint8 feeProtocol, bool unlocked)',
@@ -22,10 +23,8 @@ const ERC20_ABI = [
 ];
 
 export function usePoolData(poolAddress: string) {
-  const { provider, isActive, chainId } = useWeb3React();
-  // Create an ethers provider from the Web3React provider
-  const library = provider ? new ethers.providers.Web3Provider(provider) : undefined;
-  const active = isActive;
+  const { chainId, provider } = useWeb3();
+  const { active } = useWeb3();
   
   const [loading, setLoading] = useState(true);
   const [pool, setPool] = useState<Pool | null>(null);
@@ -42,11 +41,11 @@ export function usePoolData(poolAddress: string) {
 
   useEffect(() => {
     const fetchPoolData = async () => {
-      if (!active || !library || !poolAddress) return;
+      if (!active || !provider || !poolAddress) return;
 
       setLoading(true);
       try {
-        const ethersProvider = library.getSigner().provider;
+        const ethersProvider = provider;
         const poolContract = new ethers.Contract(
           poolAddress,
           UNISWAP_POOL_ABI,
@@ -154,16 +153,14 @@ export function usePoolData(poolAddress: string) {
     };
 
     fetchPoolData();
-  }, [active, library, poolAddress, chainId]);
+  }, [active, provider, poolAddress, chainId]);
 
   return { pool, poolData, loading };
 }
 
 export function useAllPoolsData() {
-  const { provider, isActive, chainId } = useWeb3React();
-  // Create an ethers provider from the Web3React provider
-  const library = provider ? new ethers.providers.Web3Provider(provider) : undefined;
-  const active = isActive;
+  const { chainId, provider } = useWeb3();
+  const { active } = useWeb3();
   
   const [poolsData, setPoolsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -171,7 +168,7 @@ export function useAllPoolsData() {
 
   useEffect(() => {
     const fetchAllPools = async () => {
-      if (!active || !library) {
+      if (!active || !provider) {
         setLoading(false);
         return;
       }
@@ -179,7 +176,7 @@ export function useAllPoolsData() {
       setLoading(true);
       
       try {
-        const ethersProvider = library.getSigner().provider;
+        const ethersProvider = provider;
         const poolsPromises = DEX_POOLS.map(async (poolInfo) => {
           try {
             const poolContract = new ethers.Contract(
@@ -232,7 +229,7 @@ export function useAllPoolsData() {
     };
 
     fetchAllPools();
-  }, [active, library, chainId]);
+  }, [active, provider, chainId]);
 
   return { poolsData, loading };
 }

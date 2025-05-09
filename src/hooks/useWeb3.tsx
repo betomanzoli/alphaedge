@@ -10,17 +10,17 @@ export function useWeb3() {
   const { 
     account,
     chainId,
-    isActive: active,
-    provider,
-    connector 
+    connector,
+    provider: web3Provider
   } = useWeb3React();
   
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
   
-  // We'll treat the provider as the library for compatibility
-  const library = provider ? new ethers.providers.Web3Provider(provider) : undefined;
-
+  // Create a proper ethers provider from the web3-react provider
+  const provider = web3Provider ? new ethers.providers.Web3Provider(web3Provider) : undefined;
+  const active = !!account && !!provider;
+  
   const connect = async () => {
     setIsConnecting(true);
     try {
@@ -50,7 +50,7 @@ export function useWeb3() {
   };
 
   const switchToNetwork = async (targetChainId: number) => {
-    if (!provider) {
+    if (!provider || !web3Provider) {
       toast({
         title: "Provider não encontrado",
         description: "Não foi possível encontrar um provider compatível.",
@@ -60,35 +60,47 @@ export function useWeb3() {
     }
     
     try {
-      // Try to switch to the network
-      await provider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${targetChainId.toString(16)}` }],
-      });
-    } catch (switchError: any) {
-      // If the network is not added to MetaMask, add it
-      if (switchError.code === 4902) {
+      // For MetaMask or similar wallets
+      if (typeof window !== 'undefined' && window.ethereum) {
         try {
-          await provider.request({
-            method: 'wallet_addEthereumChain',
-            params: [NETWORK_PARAMS[targetChainId]],
+          // Try to switch to the network
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: `0x${targetChainId.toString(16)}` }],
           });
-        } catch (addError) {
-          console.error("Error adding network:", addError);
-          toast({
-            title: "Erro ao adicionar rede",
-            description: "Não foi possível adicionar a rede à sua carteira.",
-            variant: "destructive"
-          });
+        } catch (switchError: any) {
+          // If the network is not added to MetaMask, add it
+          if (switchError.code === 4902) {
+            try {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [NETWORK_PARAMS[targetChainId]],
+              });
+            } catch (addError) {
+              console.error("Error adding network:", addError);
+              toast({
+                title: "Erro ao adicionar rede",
+                description: "Não foi possível adicionar a rede à sua carteira.",
+                variant: "destructive"
+              });
+            }
+          } else {
+            console.error("Error switching network:", switchError);
+            toast({
+              title: "Erro ao trocar de rede",
+              description: "Não foi possível mudar para a rede solicitada.",
+              variant: "destructive"
+            });
+          }
         }
-      } else {
-        console.error("Error switching network:", switchError);
-        toast({
-          title: "Erro ao trocar de rede",
-          description: "Não foi possível mudar para a rede solicitada.",
-          variant: "destructive"
-        });
       }
+    } catch (error) {
+      console.error("Error switching network:", error);
+      toast({
+        title: "Erro ao trocar de rede",
+        description: "Não foi possível mudar para a rede solicitada.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -101,7 +113,7 @@ export function useWeb3() {
     isConnecting,
     active,
     account,
-    library,
+    library: provider,
     chainId,
     isOptimismNetwork
   };

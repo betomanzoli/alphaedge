@@ -1,18 +1,18 @@
 
 import React from 'react';
-import { Web3ReactProvider, Web3ReactHooks, initializeConnector } from '@web3-react/core';
+import { Web3ReactProvider } from '@web3-react/core';
 import { MetaMask } from '@web3-react/metamask';
 import { Web3Provider as EthersWeb3Provider } from '@ethersproject/providers';
 
-// Initialize the injected connector
-const [metaMask, metaMaskHooks] = initializeConnector<MetaMask>(
-  (actions) => new MetaMask(actions)
-);
+// Function to get library from provider
+const getLibrary = (provider: any): EthersWeb3Provider => {
+  const library = new EthersWeb3Provider(provider);
+  library.pollingInterval = 12000;
+  return library;
+};
 
-// Create an array of connector-hooks pairs
-const connectors: [MetaMask, Web3ReactHooks][] = [
-  [metaMask, metaMaskHooks],
-];
+// Initialize the injected connector
+const metaMask = new MetaMask({ actions: {} });
 
 interface Web3ProviderProps {
   children: React.ReactNode;
@@ -20,7 +20,7 @@ interface Web3ProviderProps {
 
 export default function Web3Provider({ children }: Web3ProviderProps) {
   return (
-    <Web3ReactProvider connectors={connectors}>
+    <Web3ReactProvider connectors={[[metaMask, getLibrary]]}>
       {children}
     </Web3ReactProvider>
   );
