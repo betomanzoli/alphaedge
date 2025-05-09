@@ -13,12 +13,14 @@ export const injected = new InjectedConnector({
 
 export function useWeb3() {
   const { 
-    activate, 
-    deactivate, 
     account, 
-    library, 
     chainId, 
-    active 
+    active,
+    connector,
+    library,
+    error,
+    activate,
+    deactivate 
   } = useWeb3React<ethers.providers.Web3Provider>();
   
   const [isConnecting, setIsConnecting] = useState(false);

@@ -22,11 +22,8 @@ const ERC20_ABI = [
 ];
 
 export function usePoolData(poolAddress: string) {
-  const { 
-    library, 
-    chainId, 
-    active 
-  } = useWeb3React<ethers.providers.Web3Provider>();
+  const context = useWeb3React<ethers.providers.Web3Provider>();
+  const { library, chainId, active } = context;
   
   const [loading, setLoading] = useState(true);
   const [pool, setPool] = useState<Pool | null>(null);
@@ -161,11 +158,8 @@ export function usePoolData(poolAddress: string) {
 }
 
 export function useAllPoolsData() {
-  const { 
-    library, 
-    chainId, 
-    active 
-  } = useWeb3React<ethers.providers.Web3Provider>();
+  const context = useWeb3React<ethers.providers.Web3Provider>();
+  const { library, chainId, active } = context;
   
   const [poolsData, setPoolsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
