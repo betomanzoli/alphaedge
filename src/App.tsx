@@ -15,6 +15,7 @@ import Performance from "./pages/Performance";
 import Settings from "./pages/Settings";
 import Docs from "./pages/Docs";
 import MevBot from "./pages/MevBot";
+import TradingBot from "./pages/TradingBot";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/mev" element={<MevBot />} />
+          <Route path="/tradingbot" element={<TradingBot />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
