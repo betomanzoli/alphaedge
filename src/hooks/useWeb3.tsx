@@ -12,11 +12,17 @@ export const injected = new InjectedConnector({
 });
 
 export function useWeb3() {
-  const context = useWeb3React<ethers.providers.Web3Provider>();
-  const { activate, deactivate, account, library, chainId } = context;
+  const { 
+    activate, 
+    deactivate, 
+    account, 
+    library, 
+    chainId, 
+    active 
+  } = useWeb3React<ethers.providers.Web3Provider>();
+  
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
-  const active = context.active;
 
   const connect = async () => {
     setIsConnecting(true);
