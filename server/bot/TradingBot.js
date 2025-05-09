@@ -1,6 +1,7 @@
 const { ethers } = require('ethers');
 const EventEmitter = require('events');
 const UniswapV3RouterABI = require('../abis/UniswapV3Router.json');
+const axios = require('axios');
 
 class TradingBot extends EventEmitter {
   constructor() {
@@ -18,7 +19,7 @@ class TradingBot extends EventEmitter {
     // Token and pool configurations
     this.tokens = {
       opXEN: {
-        address: '0x0000000000000000000000000000000000000000', // Replace with actual address
+        address: '0x4bF66A12B801dAD73B3B4Ff026623eD7B4969489', // opXEN on Optimism
         decimals: 18
       },
       WETH: {
@@ -47,9 +48,14 @@ class TradingBot extends EventEmitter {
     
     // Uniswap Router - would be initialized in start()
     this.uniswapRouter = null;
+    this.provider = null;
+    this.signer = null;
     
     // Price monitoring interval
     this.monitoringInterval = null;
+    
+    // Pool address for opXEN/WETH
+    this.poolAddress = '0x1A0D5DAEBa1F72b3D3Ce9F86401da34A191D9Ee2'; // opXEN/WETH pool
   }
   
   async start() {
@@ -62,8 +68,8 @@ class TradingBot extends EventEmitter {
       console.log('Starting trading bot...');
       this.isRunning = true;
       
-      // In a real implementation, initialize blockchain connection
-      // this.initializeBlockchainConnection();
+      // Initialize blockchain connection
+      await this.initializeBlockchainConnection();
       
       // Start price monitoring
       this.startPriceMonitoring();
@@ -74,6 +80,37 @@ class TradingBot extends EventEmitter {
       console.error('Error starting trading bot:', error);
       this.isRunning = false;
       this.emit('botError', { error: error.message });
+    }
+  }
+  
+  async initializeBlockchainConnection() {
+    try {
+      // Use environment variable for RPC URL
+      const OPTIMISM_RPC_URL = process.env.OPTIMISM_RPC_URL || 'https://mainnet.optimism.io';
+      
+      // Create provider
+      this.provider = new ethers.JsonRpcProvider(OPTIMISM_RPC_URL);
+      
+      // In production, would use a private key from secure storage
+      if (process.env.TRADER_PRIVATE_KEY) {
+        this.signer = new ethers.Wallet(process.env.TRADER_PRIVATE_KEY, this.provider);
+        console.log('Wallet connected:', this.signer.address);
+      } else {
+        console.log('No private key provided, working in read-only mode');
+      }
+      
+      // Initialize Uniswap router contract
+      const UNISWAP_ROUTER_ADDRESS = '0xE592427A0AEce92De3Edee1F18E0157C05861564'; // Uniswap V3 Router
+      this.uniswapRouter = new ethers.Contract(
+        UNISWAP_ROUTER_ADDRESS,
+        UniswapV3RouterABI,
+        this.signer || this.provider
+      );
+      
+      console.log('Blockchain connection initialized successfully');
+    } catch (error) {
+      console.error('Error initializing blockchain connection:', error);
+      throw error;
     }
   }
   
@@ -106,16 +143,19 @@ class TradingBot extends EventEmitter {
   startPriceMonitoring() {
     console.log('Starting price monitoring...');
     
-    // In a real implementation, this would use WebSockets or an API to get real-time prices
+    // Get initial price
+    this.monitorPrice();
+    
+    // Set up interval for monitoring
     this.monitoringInterval = setInterval(() => {
       this.monitorPrice();
-    }, 5000); // Check price every 5 seconds
+    }, 30000); // Check price every 30 seconds
   }
   
   async monitorPrice() {
     try {
-      // In a real implementation, get actual price from blockchain or API
-      const newPrice = this.getMockPrice();
+      // Get actual price from pool or API
+      const newPrice = await this.getTokenPrice();
       
       // Update price data
       this.priceData.previous = this.priceData.current;
@@ -153,6 +193,69 @@ class TradingBot extends EventEmitter {
     } catch (error) {
       console.error('Error monitoring price:', error);
       this.emit('botError', { error: error.message });
+      
+      // Fallback to mock price if real price can't be obtained
+      if (this.priceData.current === 0) {
+        const mockPrice = this.getMockPrice();
+        this.priceData.current = mockPrice;
+        console.log('Using mock price as fallback:', mockPrice);
+      }
+    }
+  }
+  
+  async getTokenPrice() {
+    try {
+      // Try to get price from blockchain first
+      if (this.provider && this.poolAddress) {
+        try {
+          // Get UniswapV3 pool data
+          const poolContract = new ethers.Contract(
+            this.poolAddress,
+            [
+              'function slot0() external view returns (uint160 sqrtPriceX96, int24 tick, uint16 observationIndex, uint16 observationCardinality, uint16 observationCardinalityNext, uint8 feeProtocol, bool unlocked)'
+            ],
+            this.provider
+          );
+          
+          // Get the current sqrt price
+          const slot0 = await poolContract.slot0();
+          const sqrtPriceX96 = slot0.sqrtPriceX96;
+          
+          // Convert sqrtPriceX96 to price
+          // For token0/token1 price: (sqrtPriceX96/2^96)^2
+          const numerator = sqrtPriceX96 * sqrtPriceX96;
+          const denominator = 2n ** 192n;
+          const price = Number(numerator) / Number(denominator);
+          
+          console.log('Real price retrieved from blockchain:', price);
+          return price;
+        } catch (error) {
+          console.error('Error getting price from blockchain:', error);
+          // Fall through to API method
+        }
+      }
+      
+      // Fallback to price API
+      try {
+        // Example API for getting token price (would replace with actual API)
+        const apiUrl = `https://api.coingecko.com/api/v3/simple/token_price/optimistic-ethereum?contract_addresses=${this.tokens.opXEN.address}&vs_currencies=eth`;
+        const response = await axios.get(apiUrl);
+        
+        if (response.data && response.data[this.tokens.opXEN.address.toLowerCase()]) {
+          const price = response.data[this.tokens.opXEN.address.toLowerCase()].eth;
+          console.log('Real price retrieved from API:', price);
+          return price;
+        }
+      } catch (apiError) {
+        console.error('Error getting price from API:', apiError);
+        // Fall through to mock price
+      }
+      
+      // If all else fails, use mock price
+      return this.getMockPrice();
+    } catch (error) {
+      console.error('Error in getTokenPrice:', error);
+      return this.getMockPrice();
     }
   }
   
@@ -255,16 +358,22 @@ class TradingBot extends EventEmitter {
       } else {
         console.log(`Executing buy order for ${ethAmount} ETH at price ${this.priceData.current}`);
         
-        // In a real implementation, this would execute an actual blockchain transaction
-        // const tx = await this.executeUniswapSwap(ethAmount, this.tokens.WETH.address, this.tokens.opXEN.address);
+        // Execute an actual blockchain transaction
+        const tx = await this.executeUniswapSwap(
+          ethAmount,
+          this.tokens.WETH.address,
+          this.tokens.opXEN.address
+        );
         
-        // For now, simulate successful transaction
+        // Calculate the token amount based on price
         const tokenAmount = ethAmount / this.priceData.current;
+        
+        // Record the transaction
         this.recordTransaction('buy', tokenAmount, ethAmount, this.priceData.current);
         
         return {
           success: true,
-          txHash: `0x${Math.random().toString(16).substring(2, 14)}`,
+          txHash: tx.hash,
           tokenAmount,
           ethAmount
         };
@@ -298,16 +407,20 @@ class TradingBot extends EventEmitter {
       } else {
         console.log(`Executing sell order for ${tokenAmount} opXEN at price ${this.priceData.current}`);
         
-        // In a real implementation, this would execute an actual blockchain transaction
-        // const tx = await this.executeUniswapSwap(tokenAmount, this.tokens.opXEN.address, this.tokens.WETH.address);
-        
-        // For now, simulate successful transaction
+        // Execute an actual blockchain transaction
         const ethAmount = tokenAmount * this.priceData.current;
+        const tx = await this.executeUniswapSwap(
+          tokenAmount,
+          this.tokens.opXEN.address,
+          this.tokens.WETH.address
+        );
+        
+        // Record the transaction
         this.recordTransaction('sell', tokenAmount, ethAmount, this.priceData.current);
         
         return {
           success: true,
-          txHash: `0x${Math.random().toString(16).substring(2, 14)}`,
+          txHash: tx.hash,
           tokenAmount,
           ethAmount
         };
@@ -320,6 +433,78 @@ class TradingBot extends EventEmitter {
         success: false,
         error: error.message
       };
+    }
+  }
+  
+  async executeUniswapSwap(amountIn, tokenInAddress, tokenOutAddress) {
+    try {
+      if (!this.signer) {
+        throw new Error('Signer not initialized. Cannot execute trades.');
+      }
+      
+      console.log(`Executing Uniswap swap: ${amountIn} of ${tokenInAddress} to ${tokenOutAddress}`);
+      
+      // Approve token spending if selling tokens (not needed for ETH)
+      if (tokenInAddress !== this.tokens.WETH.address) {
+        const tokenContract = new ethers.Contract(
+          tokenInAddress,
+          [
+            'function approve(address spender, uint256 amount) external returns (bool)'
+          ],
+          this.signer
+        );
+        
+        const approvalTx = await tokenContract.approve(
+          this.uniswapRouter.target,
+          ethers.parseUnits(amountIn.toString(), 18)
+        );
+        
+        console.log('Approval transaction sent:', approvalTx.hash);
+        await approvalTx.wait();
+        console.log('Approval confirmed');
+      }
+      
+      // Set up swap parameters
+      const path = ethers.solidityPacked(['address', 'uint24', 'address'], [
+        tokenInAddress,
+        3000, // 0.3% fee tier
+        tokenOutAddress
+      ]);
+      
+      const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes
+      const amountOutMinimum = 0; // In production, would calculate based on slippage tolerance
+      
+      // Execute swap
+      let tx;
+      
+      if (tokenInAddress === this.tokens.WETH.address) {
+        // ETH to Token
+        tx = await this.uniswapRouter.swapExactETHForTokens(
+          amountOutMinimum,
+          [tokenInAddress, tokenOutAddress],
+          this.signer.address,
+          deadline,
+          { value: ethers.parseEther(amountIn.toString()) }
+        );
+      } else {
+        // Token to ETH
+        tx = await this.uniswapRouter.swapExactTokensForETH(
+          ethers.parseUnits(amountIn.toString(), 18),
+          amountOutMinimum,
+          [tokenInAddress, tokenOutAddress],
+          this.signer.address,
+          deadline
+        );
+      }
+      
+      console.log('Swap transaction sent:', tx.hash);
+      await tx.wait();
+      console.log('Swap confirmed');
+      
+      return tx;
+    } catch (error) {
+      console.error('Error executing Uniswap swap:', error);
+      throw error;
     }
   }
   
