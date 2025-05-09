@@ -22,8 +22,10 @@ const ERC20_ABI = [
 ];
 
 export function usePoolData(poolAddress: string) {
-  const context = useWeb3React<ethers.providers.Web3Provider>();
-  const { library, chainId, active } = context;
+  const { provider, isActive, chainId } = useWeb3React();
+  // Create an ethers provider from the Web3React provider
+  const library = provider ? new ethers.providers.Web3Provider(provider) : undefined;
+  const active = isActive;
   
   const [loading, setLoading] = useState(true);
   const [pool, setPool] = useState<Pool | null>(null);
@@ -44,11 +46,11 @@ export function usePoolData(poolAddress: string) {
 
       setLoading(true);
       try {
-        const provider = library.getSigner().provider;
+        const ethersProvider = library.getSigner().provider;
         const poolContract = new ethers.Contract(
           poolAddress,
           UNISWAP_POOL_ABI,
-          provider
+          ethersProvider
         );
 
         // Get pool basic information
@@ -61,8 +63,8 @@ export function usePoolData(poolAddress: string) {
         ]);
 
         // Get token information
-        const token0Contract = new ethers.Contract(token0Address, ERC20_ABI, provider);
-        const token1Contract = new ethers.Contract(token1Address, ERC20_ABI, provider);
+        const token0Contract = new ethers.Contract(token0Address, ERC20_ABI, ethersProvider);
+        const token1Contract = new ethers.Contract(token1Address, ERC20_ABI, ethersProvider);
 
         const [
           token0Name, token0Symbol, token0Decimals,
@@ -158,8 +160,10 @@ export function usePoolData(poolAddress: string) {
 }
 
 export function useAllPoolsData() {
-  const context = useWeb3React<ethers.providers.Web3Provider>();
-  const { library, chainId, active } = context;
+  const { provider, isActive, chainId } = useWeb3React();
+  // Create an ethers provider from the Web3React provider
+  const library = provider ? new ethers.providers.Web3Provider(provider) : undefined;
+  const active = isActive;
   
   const [poolsData, setPoolsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -175,13 +179,13 @@ export function useAllPoolsData() {
       setLoading(true);
       
       try {
-        const provider = library.getSigner().provider;
+        const ethersProvider = library.getSigner().provider;
         const poolsPromises = DEX_POOLS.map(async (poolInfo) => {
           try {
             const poolContract = new ethers.Contract(
               poolInfo.address,
               UNISWAP_POOL_ABI,
-              provider
+              ethersProvider
             );
 
             // Get basic pool information

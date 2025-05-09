@@ -1,39 +1,36 @@
 
 import { useState } from 'react';
 import { useWeb3React } from '@web3-react/core';
-import { InjectedConnector } from '@web3-react/injected-connector';
+import { MetaMask } from '@web3-react/metamask';
 import { ethers } from 'ethers';
 import { CHAIN_OPTIMISM_MAINNET, CHAIN_OPTIMISM_TESTNET, NETWORK_PARAMS } from '@/constants/dex';
 import { useToast } from '@/hooks/use-toast';
 
-// Configure supported chains
-export const injected = new InjectedConnector({
-  supportedChainIds: [CHAIN_OPTIMISM_MAINNET, CHAIN_OPTIMISM_TESTNET]
-});
-
 export function useWeb3() {
   const { 
-    account, 
-    chainId, 
-    active,
-    connector,
-    library,
-    error,
-    activate,
-    deactivate 
-  } = useWeb3React<ethers.providers.Web3Provider>();
+    account,
+    chainId,
+    isActive: active,
+    provider,
+    connector 
+  } = useWeb3React();
   
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
+  
+  // We'll treat the provider as the library for compatibility
+  const library = provider ? new ethers.providers.Web3Provider(provider) : undefined;
 
   const connect = async () => {
     setIsConnecting(true);
     try {
-      await activate(injected);
-      toast({
-        title: "Conexão estabelecida",
-        description: "Sua carteira foi conectada com sucesso.",
-      });
+      if (connector instanceof MetaMask) {
+        await connector.activate();
+        toast({
+          title: "Conexão estabelecida",
+          description: "Sua carteira foi conectada com sucesso.",
+        });
+      }
     } catch (error) {
       console.error("Connection error:", error);
       toast({
@@ -47,11 +44,13 @@ export function useWeb3() {
   };
 
   const disconnect = () => {
-    deactivate();
+    if (connector instanceof MetaMask) {
+      connector.deactivate();
+    }
   };
 
   const switchToNetwork = async (targetChainId: number) => {
-    if (!library?.provider?.request) {
+    if (!provider) {
       toast({
         title: "Provider não encontrado",
         description: "Não foi possível encontrar um provider compatível.",
@@ -59,8 +58,6 @@ export function useWeb3() {
       });
       return;
     }
-
-    const provider = library.provider;
     
     try {
       // Try to switch to the network
