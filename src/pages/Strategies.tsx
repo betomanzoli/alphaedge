@@ -1,105 +1,140 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Grid } from "@/components/ui/grid";
-import { Play, Settings, PlusCircle, Info } from "lucide-react";
-import Sidebar from "@/components/layout/Sidebar";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/layout/Header";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import Sidebar from "@/components/layout/Sidebar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Grid } from "@/components/ui/grid";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DexSelector from "@/components/dex/DexSelector";
+import WalletConnector from "@/components/dex/WalletConnector";
+import NetworkSelector from "@/components/dex/NetworkSelector";
+import PoolSelector from "@/components/dex/PoolSelector";
+import PoolInfo from "@/components/dex/PoolInfo";
+import Web3Provider from "@/providers/Web3Provider";
+import { DEX_POOLS } from "@/constants/dex";
 
 const Strategies = () => {
+  const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [exchangeType, setExchangeType] = useState<'DEX' | 'CEX'>('DEX');
+  const [selectedPool, setSelectedPool] = useState<string>(DEX_POOLS[0]?.address || '');
+
+  const handleExchangeTypeChange = (type: 'DEX' | 'CEX') => {
+    setExchangeType(type);
+  };
+
+  const handlePoolSelect = (poolAddress: string) => {
+    setSelectedPool(poolAddress);
+  };
 
   return (
-    <div className="flex h-screen bg-trading-dark text-white overflow-hidden">
-      <Sidebar isOpen={sidebarOpen} />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+    <Web3Provider>
+      <div className="flex h-screen bg-trading-dark text-white overflow-hidden">
+        <Sidebar isOpen={sidebarOpen} />
         
-        <main className="flex-1 overflow-auto p-6">
-          <div className="space-y-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+          
+          <main className="flex-1 overflow-auto p-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
               <div>
-                <h2 className="text-2xl font-bold">Estratégias de Trading</h2>
-                <p className="text-gray-400 mt-1">Configure e gerencie suas estratégias de trading automatizadas</p>
+                <h2 className="text-2xl font-bold">{t("strategies")}</h2>
+                <p className="text-gray-400">
+                  {exchangeType === 'DEX' 
+                    ? 'Configure estratégias para tokens de baixa liquidez em DEXs' 
+                    : 'Configure estratégias para troca em corretoras centralizadas'}
+                </p>
               </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Button className="bg-trading-primary hover:bg-trading-secondary">
-                      <PlusCircle className="h-4 w-4 mr-2" />
-                      Criar Estratégia
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Crie uma nova estratégia automatizada</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             </div>
             
-            <div className="rounded-lg border border-gray-800 bg-trading-darker p-6">
-              <div className="flex items-start gap-4">
-                <Info className="h-5 w-5 text-blue-400 mt-1" />
-                <div>
-                  <h3 className="text-lg font-medium mb-2">Como começar com estratégias automatizadas</h3>
-                  <ol className="list-decimal list-inside space-y-2 text-gray-300">
-                    <li>Configure suas chaves de API na seção "Chaves API"</li>
-                    <li>Escolha uma estratégia predefinida ou crie uma personalizada</li>
-                    <li>Configure os parâmetros da estratégia (par de trading, limites, etc)</li>
-                    <li>Faça um teste com valores pequenos primeiro</li>
-                    <li>Monitore o desempenho e ajuste conforme necessário</li>
-                  </ol>
-                  <div className="mt-4 text-sm text-gray-400">
-                    <p className="font-medium mb-1">Tipos de estratégias disponíveis:</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>Grid Trading - Compra e venda em faixas de preço predefinidas</li>
-                      <li>DCA (Dollar Cost Average) - Investimento em intervalos regulares</li>
-                      <li>Tendência - Segue tendências usando médias móveis</li>
-                      <li>Reversão à Média - Opera em momentos de retorno à média</li>
-                    </ul>
+            <Tabs defaultValue="dex" className="mb-6">
+              <TabsList className="bg-trading-darker border-gray-700">
+                <TabsTrigger value="dex">DEX</TabsTrigger>
+                <TabsTrigger value="strategies">Estratégias</TabsTrigger>
+                <TabsTrigger value="analytics">Análise</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="dex">
+                <Grid className="grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="md:col-span-1 space-y-6">
+                    <DexSelector onTypeChange={handleExchangeTypeChange} />
+                    <WalletConnector />
+                    <NetworkSelector />
+                    <PoolSelector onPoolSelect={handlePoolSelect} />
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <Grid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Card className="bg-trading-darker border-gray-800">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg font-medium">Criar Nova Estratégia</CardTitle>
-                      <CardDescription className="text-gray-400">
-                        Comece configurando uma nova estratégia automatizada
-                      </CardDescription>
+                  
+                  <div className="md:col-span-3 space-y-6">
+                    <PoolInfo poolAddress={selectedPool} />
+                    
+                    <Card className="bg-trading-darker border-gray-800">
+                      <CardHeader>
+                        <CardTitle>Análise do Token</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center text-gray-400">
+                          Dados de análise detalhada aparecerão aqui após a implementação completa da integração com a API
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Card className="bg-trading-darker border-gray-800">
+                        <CardHeader>
+                          <CardTitle>Performance do par opXEN/ETH</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-center text-gray-400">
+                            Dados históricos serão carregados após a implementação do rastreamento de preços
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-trading-darker border-gray-800">
+                        <CardHeader>
+                          <CardTitle>Volume de Negociação</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-center text-gray-400">
+                            Dados de volume serão carregados após a implementação do rastreamento on-chain
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm text-gray-400">
-                    <p>1. Escolha um tipo de estratégia</p>
-                    <p>2. Configure os parâmetros</p>
-                    <p>3. Defina limites de risco</p>
-                    <p>4. Inicie a operação</p>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between pt-2 border-t border-gray-800">
-                  <Button variant="outline" size="sm" className="border-gray-700">
-                    <Settings className="h-4 w-4 mr-1" /> Configurar
-                  </Button>
-                  <Button variant="default" size="sm" className="bg-trading-profit hover:bg-green-700">
-                    <Play className="h-4 w-4 mr-1" /> Começar
-                  </Button>
-                </CardFooter>
-              </Card>
-            </Grid>
-          </div>
-        </main>
+                </Grid>
+              </TabsContent>
+              
+              <TabsContent value="strategies">
+                <Card className="bg-trading-darker border-gray-800">
+                  <CardHeader>
+                    <CardTitle>Estratégias de Trading</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center text-gray-400">
+                      Configure e gerencie suas estratégias de trading para o token opXEN
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="analytics">
+                <Card className="bg-trading-darker border-gray-800">
+                  <CardHeader>
+                    <CardTitle>Análise de Performance</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center text-gray-400">
+                      Visualize a performance histórica de suas estratégias
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </main>
+        </div>
       </div>
-    </div>
+    </Web3Provider>
   );
 };
 
