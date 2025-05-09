@@ -13,7 +13,8 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  TooltipProps
 } from "recharts";
 import {
   Tabs,
@@ -58,7 +59,18 @@ const assetAllocation = [
 
 const COLORS = ["#10B981", "#60A5FA", "#F59E0B"];
 
-const CustomTooltip = ({ active, payload, label }) => {
+// Add proper TypeScript interface for CustomTooltip
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    name: string;
+    value: number;
+    color: string;
+  }>;
+  label?: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-trading-dark border border-gray-700 rounded p-3">
