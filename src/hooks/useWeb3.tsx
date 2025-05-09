@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import { ethers } from 'ethers';
@@ -12,9 +12,11 @@ export const injected = new InjectedConnector({
 });
 
 export function useWeb3() {
-  const { activate, deactivate, active, account, library, chainId } = useWeb3React();
+  const context = useWeb3React<ethers.providers.Web3Provider>();
+  const { activate, deactivate, account, library, chainId } = context;
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
+  const active = context.active;
 
   const connect = async () => {
     setIsConnecting(true);
